@@ -1,4 +1,5 @@
 from tkinter import *
+import ast
 
 root = Tk()
 root.title("Calculator")
@@ -13,12 +14,33 @@ def get_number(number):
     input.insert(index, number)
     index += 1
 
+def delete_number():
+    global index
+    if index > 0:
+        input.delete(index-1, END)
+        index -= 1
+
 def get_operations(operator):
     global index
     if operator == "AC":
         input.delete(0, END)
         index = 0
         return
+    if operator == "=":
+        try:
+            expression = input.get()
+            node = ast.parse(expression, mode='eval')
+            result = eval(compile(node,'<string>','eval'))
+            input.delete(0, END)
+            input.insert(0, f"= {result}")
+            index = 0
+            return
+        except Exception as e:
+            input.delete(0, END)
+            input.insert(0, "Error: "+str(e))
+            index = 0
+            return
+        
     length=len(operator)
     input.insert(index, operator)
     index += length
@@ -40,7 +62,10 @@ for i in range(0,3):
         button.grid(row=i, column=j, padx=10, pady=10)
         count += 1
 button0 = Button(numberframe, text="0", padx=5, pady=5, font=("Arial", 11),width=4,command=lambda :get_number(0),bg="#63bcee")
-button0.grid(row=3, column=1, padx=10, pady=10)
+button0.grid(row=3, column=0, padx=10, pady=10)
+
+delbutton = Button(numberframe, text="DEL", padx=5, pady=5, font=("Arial", 11),width=4,bg="#63bcee",command=delete_number)
+delbutton.grid(row=3, column=2, padx=10, pady=10)
 
 operations=["AC", "+", "-", "*", "/", "=","**","%","*3.14","**2","(",")"]
 operationsframe = Frame(root,bg="lightblue")
